@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# Check if the script is run as root
+if [ "$(id -u)" != "0" ]; then
+    echo "Error: Skrip ini harus dijalankan sebagai root."
+    exit 1
+fi
+domain=$(cat /etc/data/domain)
+port=$(netstat -tunlp | grep 'python' | awk '{split($4, a, ":"); print a[2]}')
+
+# Code for service
+export RED='\033[0;31m';
+export GREEN='\033[0;32m';
+export YELLOW='\033[0;33m';
+export BLUE='\033[0;34m';
+export PURPLE='\033[0;35m';
+export CYAN='\033[0;36m';
+export LIGHT='\033[0;37m';
+export NC='\033[0m';
+
+# Export Banner Status Information
+export ERROR="[${RED} ERROR ${NC}]";
+export INFO="[${YELLOW} INFO ${NC}]";
+export OKEY="[${GREEN} OKEY ${NC}]";
+export PENDING="[${YELLOW} PENDING ${NC}]";
+export SEND="[${YELLOW} SEND ${NC}]";
+export RECEIVE="[${YELLOW} RECEIVE ${NC}]";
+
+# Function to print a stylish line
+print_line() {
+    echo "------------------------"
+}
+
+# VAR
+if [[ $(netstat -ntlp | grep -i wireproxy | grep -i 127.0.0.1:40000 | awk '{print $4}' | cut -d: -f2 | xargs | sed -e 's/ /, /g') == '40000' ]]; then
+    WARP="${OKEY} Listening to 127.0.0.1:40000";
+    WARP_STATUS="${GREEN}WARP AMAN!${NC}"
+else
+    WARP="${ERROR}";
+    WARP_STATUS="${RED}WARP ADA ERROR BOSSKUH${NC}"
+fi
+if [[ $(systemctl status ufw | grep -w active | awk '{print $2}' | sed 's/(//g' | sed 's/)//g' | sed 's/ //g') == 'active' ]]; then
+    UFW="${GREEN}[ON]${NC}";
+else
+    UFW="${RED}[ERROR!]${NC}";
+fi
+if [[ $(systemctl status fail2ban | grep -w active | awk '{print $2}' | sed 's/(//g' | sed 's/)//g' | sed 's/ //g') == 'active' ]]; then
+    F2B="${GREEN}[ON]${NC}";
+else
+    F2B="${RED}[ERROR!]${NC}";
+fi
+ipv6_status=$(sysctl -n net.ipv6.conf.all.disable_ipv6)
+if [ "$ipv6_status" -eq 1 ]; then
+    IPV6="${GREEN}[ON]${NC}";
+else
+    IPV6="${RED}[OFF]${NC}";
+fi
+
+clear
+
+printf "Selamat datang di layanan AutoScript tonho dalua x Marzban\n" | lolcat -a
+printf "\n"
+
+printf ">> ${GREEN}Menu Tambah User${NC}\n"
+print_line
+printf "\-] addvmess                                : add user dengan protocol VMess Bundle\n"
+printf "\-] addvmws                                 : add user dengan protocol VMess WS\n"
+printf "\-] addvmgrpc                               : add user dengan protocol VMess GRPC\n"
+printf "\-] addvmhu                                 : add user dengan protocol VMess HTTP Upgrade\n"
+printf "\-] addvless                                : add user dengan protocol VLess Bundle\n"
+printf "\-] addvlws                                 : add user dengan protocol VLess WS \n"
+printf "\-] addvlgrpc                               : add user dengan protocol VLess GRPC \n"
+printf "\-] addvlhu                                 : add user dengan protocol VLess HTTP Upgrade \n"
+printf "\-] addtrojan                               : add user dengan protocol Trojan Bundle\n"
+printf "\-] addtrws                                 : add user dengan protocol Trojan WS\n"
+printf "\-] addtrgrpc                               : add user dengan protocol Trojan GRPC\n"
+printf "\-] addtrhu                                 : add user dengan protocol Trojan HTTP Upgrade\n"
+printf "\-] addshadow                               : add user dengan protocol ShadowSocks Bundle\n"
+printf "\-] addssws                                 : add user dengan protocol ShadowSocks WS\n"
+printf "\-] addssgrpc                               : add user dengan protocol ShadowSocks GRPC\n"
+printf "\-] addsshu                                 : add user dengan protocol ShadowSocks HTTP Upgrade\n"
+printf "\-] addsso                                  : add user dengan protocol ShadowSocks Outline\n"
+printf "\-] addtrial [protocol] [waktu dalam menit] : add trial user dengan protocol Trojan, VMess, VLess atau ShadowSocks dengan satuan waktu menit\n"
+printf "\n"
+printf ">> ${GREEN}Menu Konfigurasi${NC}\n"
+print_line
+printf "\-] menu-backup                             : sett untuk backup dan restore Konfigurasi ke Telegram BOT\n"
+printf "\-] menu-reboot                             : sett konfigurasi reboot otomatis server\n"
+printf "\-] menu-akun                               : menampilkan keseluruhan user dan fungsi menu delete, renew, cek detail user, dan reset usage user\n"
+printf "\-] hapus [username]                        : Perintah praktis untuk hapus akun berdasarkan username akun\n"
+printf "\-] renew [username] [expired baru (Hari)]  : Perintah praktis untuk Perpanjang masa aktif akun berdasarkan username akun\n"
+printf "\-] resetusage [username]                   : Perintah praktis untuk Reset penggunaan data akun berdasarkan username akun\n"
+printf "\-] status [username]                       : Perintah praktis untuk Cek status akun berdasarkan username\n"
+printf "\-] ceklogin                                : cek login user Xray\n"
+printf "\-] buat_token                              : Penambahan token untuk konfigurasi API\n"
+printf "\-] ceklog                                  : cek akses log Xray secara Realtime\n"
+printf "\-] cekerror                                : cek error log Xray secara Realtime\n"
+printf "\-] ceknginx                                : cek akses log Nginx secara Realtime\n"
+printf "\-] ram                                     : cek ram yang tersisa\n"
+printf "\-] setlimit                                : sett untuk limitasi user Xray\n"
+printf "\-] bench                                   : benchmark kemampuan VPS\n"
+printf "\-] ganticore                               : sett untuk mengganti versi core Xray Official\n"
+printf "\-] warp                                    : Menu Warp\n"
+printf "\n"
+
+printf ">> ${GREEN}List Commands Marzban${NC}\n"
+print_line
+printf "\-] marzban up                       : start service Marzban\n"
+printf "\-] marzban down                     : stop service Marzban\n"
+printf "\-] marzban restart                  : restart service Marzban\n"
+printf "\-] marzban status                   : cek status service Marzban\n"
+printf "\-] marzban logs                     : cek log service Marzban\n"
+printf "\-] marzban update                   : update service Marzban\n"
+printf "\-] marzban cli admin create --sudo  : add admin dengan akses penuh ke Marzban\n"
+printf "\-] marzban cli admin list           : menampilkan list Admin pada service Marzban\n"
+printf "\-] marzban cli user list            : menampilkan list user pada service Marzban\n"
+printf "\n"
+
+printf ">> ${GREEN}Main Service port${NC}\n"
+print_line
+printf "\-] VLess WebSocket          : 80, 443\n"
+printf "\-] VLess gRPC               : 443\n"
+printf "\-] VMess WebSocket          : 80, 443\n"
+printf "\-] VMess gRPC               : 443\n"
+printf "\-] Trojan WebSocket         : 80, 443\n"
+printf "\-] Trojan gRPC              : 443\n"
+printf "\-] ShadowSocks WebSocket    : 80, 443\n"
+printf "\-] ShadowSocks gRPC	     : 443\n"
+printf "\-] Nginx                    : 443, 8081\n"
+printf "\n"
+
+printf ">> ${GREEN}Fitur lain${NC}\n"
+print_line
+printf "\-] Dashboard Marzban GUI    : https://$domain:$port/dashboard\n"
+printf "\-] Port TLS Alternatif      : 8443, 8880\n"
+printf "\-] Port nTLS Alternatif     : 2082, 2083, 3128, 8080\n"
+printf "\-] Warp Wireproxy           : $WARP $WARP_STATUS\n"
+printf "\-] Timezone                 : Asia/Jakarta (+7)\n"
+printf "\-] Fail2Ban                 : $F2B\n"
+printf "\-] Firewall                 : $UFW\n"
+printf "\-] IPv6                     : $IPV6\n"
+printf "\n"

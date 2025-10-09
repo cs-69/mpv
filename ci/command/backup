@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Check if the script is run as root
+if [ "$(id -u)" != "0" ]; then
+    echo "Error: Skrip ini harus dijalankan sebagai root."
+    exit 1
+fi
+clear
+
+tanggal=$(date +"%m-%d-%Y")
+tanggal2=$(date +"%m%d%Y")
+waktu=$(date +"%T" | tr -d ':')
+
+# Check if bot token and user ID are already set
+if [[ ! -f "/etc/data/telegram_config.conf" ]]; then
+    # Bot token and user ID not set, prompt user to enter them
+    echo "Bot token and user ID are not set. Please enter your bot token and user ID."
+    
+    read -rp "Enter your Telegram bot token: " botToken
+    read -rp "Enter your Telegram user ID: " chatId
+    
+    # Save the configuration
+    echo "botToken=$botToken" > "/etc/data/telegram_config.conf"
+    echo "chatId=$chatId" >> "/etc/data/telegram_config.conf"
+    
+    echo "Configuration saved successfully. You can now run the backup script."
+    exit 0
+fi
+
+# Configuration file exists, load values
+source "/etc/data/telegram_config.conf"
+
+# Authentication
+nama=$(cat /etc/data/nama)
+
+red='\e[1;31m'
+green='\e[0;32m'
+NC='\e[0m'
+green() { echo -e "\\033[32;1m${*}\\033[0m"; }
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+echo -e "Memulai Backup"
+InputPass=$(cat /etc/data/passbackup)
+sleep 1
+echo -e "[ ${green}INFO${NC} ] Processing... "
+mkdir -p /root/backup
+sleep 1
+
+	cp -r /opt/marzban /root/backup/
+	cp /var/lib/marzban/xray_config.json /root/backup/
+	cp /var/lib/marzban/max_ips.conf /root/backup/
+	cp /var/lib/marzban/db.sqlite3 /root/backup/
+	cp -r /var/www/html/ /root/backup/
+    cp /etc/data/telegram_config.conf /root/backup
+    cp /etc/data/file_id.txt /root/backup
+cd /root
+zip -rP ${InputPass} ${nama}_${waktu}_${tanggal2}.zip backup
+
+##############++++++++++++++++++++++++#############
+
+curdir="/root/${nama}_${waktu}_${tanggal2}.zip"
+echo "Sending $curdir to Telegram..."
+
+# Mengirim dokumen dan mendapatkan respons JSON
+response=$(curl -F chat_id=$chatId -F document=@$curdir https://api.telegram.org/bot$botToken/sendDocument)
+
+# Ekstrak file_id dari respons JSON
+file_id=$(echo "$response" | jq -r '.result.document.file_id')
+
+# Menyimpan file_id ke file
+echo "### ${nama}_${waktu}_${tanggal}" >> /etc/data/file_id.txt
+echo "File ID: $file_id" >> /etc/data/file_id.txt
+echo "Server telah berhasil backup data pada tanggal $tanggal pukul $waktu." >> "/etc/data/log-backup.txt"
+sleep 1
+rm -rf /root/backup &> /dev/null
+rm -f $curdir &> /dev/null
+profile
