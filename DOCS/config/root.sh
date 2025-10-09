@@ -1,11 +1,9 @@
 #!/bin/bash
 #by tonho dalua
 # echo "$crot    ALL=(ALL:ALL) ALL" >> /etc/sudoers;
-rm /etc/ssh/sshd_config;
-wget -q -O /etc/ssh/sshd_config https://raw.githubusercontent.com/cs-69/mpv/refs/heads/master/DOCS/config/sshd_config;
+wget -q -O /tmp/sshd_config https://raw.githubusercontent.com/cs-69/mpv/refs/heads/master/DOCS/config/sshd_config && sudo mv /tmp/sshd_config /etc/ssh/sshd_config;
 systemctl restart ssh;
-rm /etc/resolv.conf;
-wget -q -O /etc/resolv.conf https://raw.githubusercontent.com/cs-69/mpv/refs/heads/master/DOCS/config/resolv.conf;
+wget -q -O /tmp/resolv.conf https://raw.githubusercontent.com/cs-69/mpv/refs/heads/master/DOCS/config/resolv.conf && sudo mv /tmp/resolv.conf /etc/resolv.conf;
 systemctl restart systemd-resolved;
 clear;
 echo -e "Masukkan Password:";
@@ -25,3 +23,7 @@ apt-get update && apt-get upgrade -y && apt dist-upgrade -y && update-grub
 
 rm /root/root.sh
 reboot
+
+
+
+
