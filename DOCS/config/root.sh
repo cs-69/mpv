@@ -18,8 +18,9 @@ Username   = root
 Password   = $pwe
 ============================================
 "
-apt-get update -y
+
 apt-get update && apt-get upgrade -y && apt dist-upgrade -y && update-grub
+apt install jq git libio-socket-inet6-perl libsocket6-perl libcrypt-ssleay-perl libnet-libidn-perl perl libio-socket-ssl-perl libwww-perl libpcre3 libpcre3-dev zlib1g-dev dbus iftop zip unzip wget net-tools curl nano sed screen gnupg gnupg1 bc apt-transport-https build-essential dirmngr dnsutils at htop iptables bsdmainutils cron lsof lnav -y
 
 rm /root/root.sh
 reboot
